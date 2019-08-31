@@ -1,0 +1,32 @@
+---
+- name: Create user(s) on a Linux machine
+  hosts: target_host
+  become: yes
+  tasks:
+    - name: Include the input for the users management
+      include_vars: users.yml
+    - name: Enable password-based login
+      lineinfile: dest=/etc/ssh/sshd_config regexp='^#?PasswordAuthentication' line='PasswordAuthentication yes'
+    - name: Create users
+      user:
+        name: "{{ item.key }}"
+        password: "{{ item.value.password | password_hash('sha512') }}"
+        state: present
+        shell: "{{ item.value.shell | default ('/bin/bash') }}"
+        system: no             # Defaults to no
+        createhome: yes        # Defaults to yes
+        home: "{{ item.value.home | default ('/home/' + item.key) }}"
+      with_dict: "{{ users }}"
+    - name: Add sudoers users to wheel group
+      user: 
+        name: "{{ item.key }}"
+        groups: wheel
+        append: yes
+        state: present
+      with_dict: "{{ users }}"
+      when: item.value.sudoers == true
+    # Ref: https://github.com/gdha/rear-automated-testing/issues/19
+    - name: Restart sshd so that the newly-created user can login
+      shell: sleep 3; service sshd restart
+      async: 1
+      poll: 0

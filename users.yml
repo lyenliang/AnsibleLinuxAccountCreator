@@ -1,0 +1,11 @@
+users:
+  john:
+    password: "4321"
+    sudoers: true
+    shell: /bin/bash
+    home: /home/jane
+  jane:
+    password: "abcd"
+    sudoers: false
+    shell: /bin/bash
+    home: /home/jane
