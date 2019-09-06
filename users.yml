@@ -3,7 +3,7 @@ users:
     password: "4321"
     sudoers: true
     shell: /bin/bash
-    home: /home/jane
+    home: /home/john
   jane:
     password: "abcd"
     sudoers: false
